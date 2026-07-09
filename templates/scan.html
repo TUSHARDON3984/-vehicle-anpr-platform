@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Scan Plate{% endblock %}
+{% block content %}
+<div class="form-card">
+    <h2>Scan a Number Plate</h2>
+    <p>Upload a clear, front-on photo of a vehicle's number plate.</p>
+    <form method="POST" enctype="multipart/form-data">
+        <label>Plate Image</label>
+        <input type="file" name="plate_image" accept=".png,.jpg,.jpeg" required>
+        <button type="submit" class="btn-primary">Scan Plate</button>
+    </form>
+</div>
+{% endblock %}

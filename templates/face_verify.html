@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Face Verification</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <canvas id="particle-canvas"></canvas>
+    <main class="container">
+        <div class="form-card" style="max-width: 480px;">
+            <h2>Verify It's You, {{ user_name }}</h2>
+            <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 16px;">
+                Look directly at the camera to complete your login.
+            </p>
+
+            <video id="video" autoplay playsinline style="width: 100%; border-radius: 12px; background: #000;"></video>
+            <canvas id="canvas" style="display: none;"></canvas>
+
+            <button id="verify-btn" class="btn-primary" type="button">🔍 Verify My Face</button>
+            <a href="{{ url_for('face.cancel') }}" class="btn-secondary" style="display:block; text-align:center; margin-top: 10px;">Cancel Login</a>
+
+            <div id="result-message" style="margin-top: 12px;"></div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/effects.js') }}"></script>
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const verifyBtn = document.getElementById('verify-btn');
+        const resultMsg = document.getElementById('result-message');
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => { video.srcObject = stream; })
+            .catch(err => {
+                resultMsg.innerHTML = '<div class="alert alert-danger">Could not access webcam: ' + err.message + '</div>';
+            });
+
+        verifyBtn.addEventListener('click', () => {
+            verifyBtn.disabled = true;
+            verifyBtn.textContent = 'Verifying...';
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            const dataUrl = canvas.toDataURL('image/jpeg');
+
+            fetch('/face/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: dataUrl })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    resultMsg.innerHTML = '<div class="alert alert-success">' + data.message + '</div>';
+                    setTimeout(() => window.location.href = data.redirect, 1000);
+                } else {
+                    resultMsg.innerHTML = '<div class="alert alert-danger">' + data.message + '</div>';
+                    verifyBtn.disabled = false;
+                    verifyBtn.textContent = '🔍 Verify My Face';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

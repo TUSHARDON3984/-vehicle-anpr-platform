@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Set Up Face ID{% endblock %}
+{% block content %}
+<div class="form-card" style="max-width: 480px;">
+    <h2>Set Up Face ID</h2>
+    <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 16px;">
+        We'll capture 5 photos of your face to enable face verification at login.
+        Make sure you're in a well-lit area and look directly at the camera.
+    </p>
+
+    <video id="video" autoplay playsinline style="width: 100%; border-radius: 12px; background: #000;"></video>
+    <canvas id="canvas" style="display: none;"></canvas>
+
+    <p id="status-text" style="margin-top: 12px; font-size: 14px; color: var(--text-secondary);">
+        Photos captured: <span id="capture-count">0</span> / 5
+    </p>
+
+    <button id="capture-btn" class="btn-primary" type="button">📸 Capture Photo</button>
+    <button id="submit-btn" class="btn-primary" type="button" style="display:none; background: linear-gradient(135deg, #10b981, #059669);">
+        ✅ Finish Setup
+    </button>
+
+    <div id="result-message" style="margin-top: 12px;"></div>
+</div>
+
+<script>
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const captureBtn = document.getElementById('capture-btn');
+const submitBtn = document.getElementById('submit-btn');
+const countEl = document.getElementById('capture-count');
+const resultMsg = document.getElementById('result-message');
+
+let capturedImages = [];
+const REQUIRED_PHOTOS = 5;
+
+navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => { video.srcObject = stream; })
+    .catch(err => {
+        resultMsg.innerHTML = '<div class="alert alert-danger">Could not access webcam: ' + err.message + '</div>';
+    });
+
+captureBtn.addEventListener('click', () => {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    const dataUrl = canvas.toDataURL('image/jpeg');
+    capturedImages.push(dataUrl);
+    countEl.textContent = capturedImages.length;
+
+    if (capturedImages.length >= REQUIRED_PHOTOS) {
+        captureBtn.style.display = 'none';
+        submitBtn.style.display = 'inline-block';
+    }
+});
+
+submitBtn.addEventListener('click', () => {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Processing...';
+
+    fetch('/face/setup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ images: capturedImages })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            resultMsg.innerHTML = '<div class="alert alert-success">' + data.message + '</div>';
+            setTimeout(() => window.location.href = '/', 1500);
+        } else {
+            resultMsg.innerHTML = '<div class="alert alert-danger">' + data.message + '</div>';
+            submitBtn.disabled = false;
+            submitBtn.textContent = '✅ Finish Setup';
+            capturedImages = [];
+            countEl.textContent = 0;
+            captureBtn.style.display = 'inline-block';
+            submitBtn.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}

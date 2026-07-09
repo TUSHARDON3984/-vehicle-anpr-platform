@@ -1,0 +1,13 @@
+﻿venv/
+plate_dataset/
+runs/
+instance/
+static/uploads/*.jpg
+static/uploads/*.png
+static/uploads/*.jpeg
+static/faces/
+face_auth/face_model.yml
+.env
+__pycache__/
+*.pyc
+yolov8n.pt

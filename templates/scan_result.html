@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Scan Result{% endblock %}
+{% block content %}
+<h2>Scan Result</h2>
+
+<img src="{{ url_for('static', filename='uploads/' + original_image) }}" class="preview-image" alt="Uploaded plate image">
+
+{% if plate_text %}
+    <p class="plate-detected">Detected Plate Text: <strong>{{ plate_text }}</strong></p>
+
+    {% if vehicle %}
+        <div class="result-card success">
+            <h3>✅ Match Found</h3>
+            <table class="data-table">
+                <tr><td>Owner Name</td><td>{{ vehicle.owner_name }}</td></tr>
+                <tr><td>Contact</td><td>{{ vehicle.owner_contact or "N/A" }}</td></tr>
+                <tr><td>Address</td><td>{{ vehicle.owner_address or "N/A" }}</td></tr>
+                <tr><td>Vehicle Model</td><td>{{ vehicle.vehicle_model or "N/A" }}</td></tr>
+                <tr><td>Vehicle Color</td><td>{{ vehicle.vehicle_color or "N/A" }}</td></tr>
+                <tr><td>Registered On</td><td>{{ vehicle.created_at.strftime('%Y-%m-%d') }}</td></tr>
+            </table>
+        </div>
+    {% else %}
+        <div class="result-card warning">
+            <h3>⚠️ No Match Found</h3>
+            <p>This plate isn't in the database yet.</p>
+            <a href="{{ url_for('main.register_vehicle') }}" class="btn-primary">Register This Vehicle</a>
+        </div>
+    {% endif %}
+{% else %}
+    <div class="result-card danger">
+        <h3>❌ No Plate Detected</h3>
+        <p>Try a clearer, front-on photo with good lighting.</p>
+    </div>
+{% endif %}
+
+<a href="{{ url_for('main.scan_plate') }}" class="btn-secondary">Scan Another</a>
+{% endblock %}

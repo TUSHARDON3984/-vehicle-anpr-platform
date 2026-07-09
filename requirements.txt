@@ -1,0 +1,17 @@
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+Flask-Login==0.6.3
+Flask-Mail==0.9.1
+opencv-contrib-python==4.10.0.84
+pytesseract==0.3.10
+numpy==1.26.4
+python-dotenv==1.0.1
+itsdangerous==2.2.0
+Werkzeug==3.0.3
+
+# Optional -- only needed if using the YOLOv8 + EasyOCR upgrade
+# (anpr/plate_recognition_yolo.py) instead of the Tesseract-based approach
+ultralytics==8.3.0
+easyocr==1.7.2
+torch==2.4.1
+torchvision==0.19.1

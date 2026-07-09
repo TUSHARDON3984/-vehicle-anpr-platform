@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Vehicle Registry{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Animated particle background layer -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Parallax glowing car illustration (moves on scroll + nav direction) -->
+    <div class="parallax-scene">
+        <div id="car-nav-wrapper">
+        <svg id="parallax-car" viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="carBody" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#fde047"/>
+                    <stop offset="50%" stop-color="#facc15"/>
+                    <stop offset="100%" stop-color="#a16207"/>
+                </linearGradient>
+                <linearGradient id="carGlass" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#e5e5e5" stop-opacity="0.9"/>
+                    <stop offset="100%" stop-color="#171717" stop-opacity="0.5"/>
+                </linearGradient>
+                <radialGradient id="wheelGlow" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#525252"/>
+                    <stop offset="100%" stop-color="#0a0a0a"/>
+                </radialGradient>
+                <filter id="carShadowGlow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="10" result="blur"/>
+                    <feMerge>
+                        <feMergeNode in="blur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+            </defs>
+
+            <ellipse cx="400" cy="255" rx="320" ry="18" fill="#4338ca" opacity="0.25"/>
+
+            <g filter="url(#carShadowGlow)">
+                <!-- Body -->
+                <path d="M80,210
+                         C90,150 150,110 230,105
+                         L320,80
+                         C360,68 460,68 505,82
+                         L590,108
+                         C660,115 720,150 730,210
+                         L720,225
+                         L620,225
+                         C615,195 585,175 555,175
+                         C525,175 495,195 490,225
+                         L330,225
+                         C325,195 295,175 265,175
+                         C235,175 205,195 200,225
+                         L95,225
+                         Z"
+                      fill="url(#carBody)" stroke="#312e81" stroke-width="2"/>
+
+                <!-- Windshield / cabin glass -->
+                <path d="M245,103 L325,84 C360,74 450,74 495,86 L565,106
+                         C540,110 500,112 460,112 L295,112 C275,112 258,109 245,103 Z"
+                      fill="url(#carGlass)"/>
+
+                <!-- Headlight -->
+                <ellipse cx="705" cy="195" rx="14" ry="9" fill="#fef9c3" opacity="0.9"/>
+                <!-- Taillight -->
+                <ellipse cx="100" cy="195" rx="10" ry="8" fill="#fda4af" opacity="0.85"/>
+
+                <!-- Wheels -->
+                <circle cx="265" cy="225" r="38" fill="url(#wheelGlow)" stroke="#1e1b4b" stroke-width="4"/>
+                <circle cx="265" cy="225" r="16" fill="#0f172a"/>
+                <circle cx="555" cy="225" r="38" fill="url(#wheelGlow)" stroke="#1e1b4b" stroke-width="4"/>
+                <circle cx="555" cy="225" r="16" fill="#0f172a"/>
+
+                <!-- Side accent line -->
+                <path d="M110,190 L715,190" stroke="#a5b4fc" stroke-width="2" opacity="0.5"/>
+            </g>
+        </svg>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-brand">🚗 Vehicle Registry Platform</div>
+        <div class="nav-links">
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('main.dashboard') }}" data-nav-index="0">Dashboard</a>
+                <a href="{{ url_for('main.scan_plate') }}" data-nav-index="1">Scan Plate</a>
+                <a href="{{ url_for('main.vehicle_list') }}" data-nav-index="2">Vehicles</a>
+                <a href="{{ url_for('main.register_vehicle') }}" data-nav-index="3">Register Vehicle</a>
+                <a href="{{ url_for('main.scan_history') }}" data-nav-index="4">Scan History</a>
+                <a href="{{ url_for('face.setup') }}" data-nav-index="5">
+                    {{ "Update Face ID" if current_user.has_face_setup else "Set Up Face ID" }}
+                </a>
+                <a href="{{ url_for('auth.logout') }}">Logout ({{ current_user.name }})</a>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}">Login</a>
+                <a href="{{ url_for('auth.register') }}">Register</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="{{ url_for('static', filename='js/effects.js') }}"></script>
+</body>
+</html>
